@@ -73,7 +73,7 @@ module.exports = (robot) ->
   # console.log robot.pagerv2.data
 
 #   hubot pager version - give the version of hubot-pager-v2 loaded
-  robot.respond /pager version\s*$/, 'pager_version', (res) ->
+  robot.respond /pager version\s*$/, id:'pager_version', (res) ->
     pkg = require path.join __dirname, '..', 'package.json'
     res.send "hubot-pager-v2 is version #{pkg.version}"
     res.finish()
@@ -90,7 +90,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager me as <email> - declare what email should be use to find user pagerduty id
-  robot.respond /pager me as ([^\s@]+@[^\s]+)\s*$/, 'pager_me_as', (res) ->
+  robot.respond /pager me as ([^\s@]+@[^\s]+)\s*$/, id:'pager_me_as', (res) ->
     [ _, email ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -102,7 +102,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager <user> as <email> - declare what email should be use to find <user> pagerduty id
-  robot.respond /pager ([^\s]+) as ([^\s@]+@[^\s]+)\s*$/, 'pager_user_as', (res) ->
+  robot.respond /pager ([^\s]+) as ([^\s@]+@[^\s]+)\s*$/, id:'pager_user_as', (res) ->
     who = null
     [ _, who, email ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageradmin')
@@ -118,7 +118,7 @@ module.exports = (robot) ->
 #   hubot pager [who is] next [oncall] - tells who is next on call
   robot.respond (
     /(?:pager )?(?:who(?: is|'s) )?(next on ?call|on ?call next)\s*$/
-  ), 'pager_next_oncall', (res) ->
+  ), id:'pager_next_oncall', (res) ->
     pagerv2.getOncall()
     .then (data) ->
       fromtime = moment(data.end).utc().add(1, 'minute').format()
@@ -142,7 +142,7 @@ module.exports = (robot) ->
 
 
 #   hubot pager oncall <message> - cc oncall and send <message> to alerting channel
-  robot.respond /(?:pager )?on ?call\s(.+)/, 'pager_msg_oncall', (res) ->
+  robot.respond /(?:pager )?on ?call\s(.+)/, id:'pager_msg_oncall', (res) ->
     [ _, msg ] = res.match
     alertchan = process.env.PAGERV2_ANNOUNCE_ROOM
     pagerv2.getOncall()
@@ -160,7 +160,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager [who is] oncall - returns who is on call
-  robot.respond /(?:pager )?(?:who(?: is|'s) )?on ?call\s*$/, 'pager_oncall', (res) ->
+  robot.respond /(?:pager )?(?:who(?: is|'s) )?on ?call\s*$/, id:'pager_oncall', (res) ->
     pagerv2.getOncall()
     .then (data) ->
       nowDate = moment().utc()
@@ -187,7 +187,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager incident <#> - gives more information about incident number <number>
-  robot.respond /pager (?:inc |incident )#?(\d+|[A-Z0-9]+)\s*$/, 'pager_incident', (res) ->
+  robot.respond /pager (?:inc |incident )#?(\d+|[A-Z0-9]+)\s*$/, id:'pager_incident', (res) ->
     [ _, incident ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -211,7 +211,7 @@ module.exports = (robot) ->
 #   hubot pager sup|inc|incidents - lists currently unresolved incidents
   robot.respond (
     /(?:pager )?(?:supo?|inc(?:idents))\s*(\d+)?(?: (\d+))?(?: (\d+))?\s*$/
-  ), 'pager_incidents', (res) ->
+  ), id:'pager_incidents', (res) ->
     [ _, from, duration, limit ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -242,7 +242,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager ack [all]         - acknowledges any unack incidents
-  robot.respond /(?:pager )?(?:a|A)ck(?: all)?\s*$/, 'pager_ack_all', (res) ->
+  robot.respond /(?:pager )?(?:a|A)ck(?: all)?\s*$/, id:'pager_ack_all', (res) ->
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
       pagerv2.upagerateIncidents(res.envelope.user)
@@ -256,7 +256,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager ack <#,#,#>           - acknowledges incident <number>
-  robot.respond /pager ack #?(.+)\s*$/, 'pager_ack_one', (res) ->
+  robot.respond /pager ack #?(.+)\s*$/, id:'pager_ack_one', (res) ->
     [ _, incidents ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -271,7 +271,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager res|resolve [all]      - resolves any unresolved incidents
-  robot.respond /pager res(?:olve)?(?: all)?\s*$/, 'pager_res_all', (res) ->
+  robot.respond /pager res(?:olve)?(?: all)?\s*$/, id:'pager_res_all', (res) ->
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
       pagerv2.upagerateIncidents(res.envelope.user, '', 'acknowledged', 'resolved')
@@ -285,7 +285,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager res|resolve <#,#,#>   - resolves incident <number>
-  robot.respond /pager res(?:olve)? #?(.+)\s*$/, 'pager_res_one', (res) ->
+  robot.respond /pager res(?:olve)? #?(.+)\s*$/, id:'pager_res_one', (res) ->
     [ _, incidents ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -301,7 +301,7 @@ module.exports = (robot) ->
 
 #   hubot pager assign [all] to me       - assigns all open incidents to caller
 #   hubot pager assign [all] to <user>   - assigns all open incidents to user
-  robot.respond /pager (?:re)?assign(?: all) to (me|[^ ]+)\s*$/, 'pager_assign_all', (res) ->
+  robot.respond /pager (?:re)?assign(?: all) to (me|[^ ]+)\s*$/, id:'pager_assign_all', (res) ->
     [ _, who ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -320,7 +320,7 @@ module.exports = (robot) ->
 
 #   hubot pager assign <#,#,#> to me     - assigns incidents <#,#,#> to caller
 #   hubot pager assign <#,#,#> to <user> - assigns incidents <#,#,#> to user
-  robot.respond /pager assign #?(.+) to (me|[^ ]+)\s*$/, 'pager_assign_one', (res) ->
+  robot.respond /pager assign #?(.+) to (me|[^ ]+)\s*$/, id:'pager_assign_one', (res) ->
     [ _, incidents, who ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -341,7 +341,7 @@ module.exports = (robot) ->
 #   - snoozes all incidents for [<duration>] (default 120m)
   robot.respond (
     /pager snooze(?: all)?(?: (?:for )(\d+)(?: min(?:utes)?)?)?\s*$/
-  ), 'pager_snooze_all', (res) ->
+  ), id:'pager_snooze_all', (res) ->
     [ _, duration ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -359,7 +359,7 @@ module.exports = (robot) ->
 #   - snoozes incident <number> for [<duration>] (default 120m)
   robot.respond (
     /pager snooze #?([^ ]+)(?: (?:for )?(\d+)(?: min(?:utes)?)?)?\s*$/
-  ), 'pager_snooze_one', (res) ->
+  ), id:'pager_snooze_one', (res) ->
     [ _, incidents, duration ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -374,7 +374,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager note <#,#,#> <note> - create a note for incidents <#,#,#>
-  robot.respond /pager note #?([^\s]+) (.*)$/, 'pager_note', (res) ->
+  robot.respond /pager note #?([^\s]+) (.*)$/, id:'pager_note', (res) ->
     [ _, incident, note ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -386,7 +386,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager notes <#>           - read notes for incident <#>
-  robot.respond /pager notes #?([^\s]+)\s*$/, 'pager_notes', (res) ->
+  robot.respond /pager notes #?([^\s]+)\s*$/, id:'pager_notes', (res) ->
     [ _, incident ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -402,7 +402,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager maintenances           - lists currently active maintenances
-  robot.respond /pager maintenances?\s*$/, 'pager_maintenances', (res) ->
+  robot.respond /pager maintenances?\s*$/, id:'pager_maintenances', (res) ->
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
       pagerv2.listMaintenances()
@@ -422,7 +422,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager extensions [name] - list extensions matching name (or list all)
-  robot.respond /pager extensions? ?(.*)?$/, 'pager_extensions', (res) ->
+  robot.respond /pager extensions? ?(.*)?$/, id:'pager_extensions', (res) ->
     [_, name] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -437,14 +437,14 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot actions - list custom action
-  robot.respond /pager actions ?(.*)?$/, 'pager_actions', (res) ->
+  robot.respond /pager actions ?(.*)?$/, id:'pager_actions', (res) ->
     [_, name] = res.match
     for line in pagerv2.listActions(name)
       res.send line
     res.finish()
 
 #   hubot run action name - run a specific action
-  robot.respond /pager run (.*)$/, 'pager_run', (res) ->
+  robot.respond /pager run (.*)$/, id:'pager_run', (res) ->
     [_, name] = res.match
     res.send pagerv2.launchActionByName(name)
     res.finish()
@@ -453,7 +453,7 @@ module.exports = (robot) ->
 #   hubot pager stfu|down <service,service,service> for <duration> [because <reason>]
   robot.respond (
     /pager (?:stfu|down) (.+) for ([0-9]+)(?:\s?m(?:in(?:utes?)?)?)?(?: because (.+))?\s*$/
-  ), 'pager_set_maintenance_per_service', (res) ->
+  ), id:'pager_set_maintenance_per_service', (res) ->
     [_, services, duration, description ] = res.match
     if services in ['*', 'all']
       services_list = []
@@ -473,7 +473,7 @@ module.exports = (robot) ->
 #   hubot pager stfu|down [for] [duration=60] [because <reason>] - creates a maintenance
   robot.respond (
     /pager (?:stfu|down)(?: for)?\s*([0-9]+)?(?:\s?m(?:in(?:utes?)?)?)?(?: because (.+))?\s*$/
-  ), 'pager_set_maintenance', (res) ->
+  ), id:'pager_set_maintenance', (res) ->
     [ _, duration, description ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -487,7 +487,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager end[s] <maintenance> - ends <maintenance>
-  robot.respond /pager (?:end(?:s)?) ([A-Z0-9]+)\s*$/, 'pager_end_maintenance', (res) ->
+  robot.respond /pager (?:end(?:s)?) ([A-Z0-9]+)\s*$/, id:'pager_end_maintenance', (res) ->
     [ _, maintenance ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -499,7 +499,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager me now            - creates an override until the end of current oncall
-  robot.respond /pager (?:([^ ]+) )?now\s*$/, 'pager_override_now', (res) ->
+  robot.respond /pager (?:([^ ]+) )?now\s*$/, id:'pager_override_now', (res) ->
     [ _, who ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -511,7 +511,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager not me            - cancels an override if any
-  robot.respond /pager not ([^ ]+)\s*$/, 'pager_cancel_override', (res) ->
+  robot.respond /pager not ([^ ]+)\s*$/, id:'pager_cancel_override', (res) ->
     [ _, who ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -530,7 +530,7 @@ module.exports = (robot) ->
     res.finish()
 
 #   hubot pager me next - creates an override for the next scheduled
-  robot.respond /pager ([^ ]+) next\s*$/, 'pager_override_next', (res) ->
+  robot.respond /pager ([^ ]+) next\s*$/, id:'pager_override_next', (res) ->
     [ _, who] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -550,7 +550,7 @@ module.exports = (robot) ->
 #   hubot pager me <duration>     - creates an override for <duration> minutes
   robot.respond (
     /pager (?:([^ ]+) )?(?:for )?(\d+)(?: min(?:utes?)?)?\s*$/
-  ), 'pager_override', (res) ->
+  ), id:'pager_override', (res) ->
     [ _, who, duration ] = res.match
     pagerv2.getPermission(res.envelope.user, 'pageruser')
     .then ->
@@ -560,3 +560,4 @@ module.exports = (robot) ->
     .catch (e) ->
       res.send e
     res.finish()
+
